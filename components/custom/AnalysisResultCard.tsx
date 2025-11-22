@@ -2,31 +2,47 @@
 import React from "react";
 import { StyleSheet } from "react-native";
 import { Card, Text } from "react-native-paper";
-// import type { AnalisisRespuesta } from "../lib/api";
+import type { ResumenSolped } from "../../backend/lib/api";
 
 interface Props {
-  result: null;
+  resumen: ResumenSolped | null;
 }
 
-const AnalysisResultCard: React.FC<Props> = ({ result }) => {
-  if (!result) return null;
+const AnalysisResultCard: React.FC<Props> = ({ resumen }) => {
+  if (!resumen) return null;
+
+  const {
+    Descripcion_texto,
+    Caracteristicas_texto,
+    Sustento_texto,
+    Cantidad_texto,
+  } = resumen;
+
+  const desc =
+  resumen.Descripcion_texto && resumen.Descripcion_texto.trim() !== ""
+    ? resumen.Descripcion_texto
+    : resumen.Caracteristicas_texto;
+
+  const cantidad =
+    resumen.Cantidad_texto ??
+    (resumen.Cantidad_num != null ? String(resumen.Cantidad_num) : "—");
+
 
   return (
     <Card style={styles.card}>
       <Card.Title title="Resultado del análisis" />
       <Card.Content>
-        <Text style={styles.label}>Resumen:</Text>
-        <Text>{
-        // result.resumen ?? result.message ?? 
-            "Sin resumen."}
-        </Text>
+        <Text style={styles.label}>Descripción:</Text>
+        <Text>{desc || "—"}</Text>
 
-        {/* {typeof result.confidence === "number" && (
-          <>
-            <Text style={styles.label}>Confianza:</Text>
-            <Text>{(result.confidence * 100).toFixed(2)}%</Text>
-          </>
-        )} */}
+        <Text style={styles.label}>Características técnicas:</Text>
+        <Text>{Caracteristicas_texto || "—"}</Text>
+
+        <Text style={styles.label}>Cantidad:</Text>
+        <Text>{cantidad ?? "—"}</Text>
+
+        <Text style={styles.label}>Sustento del pedido:</Text>
+        <Text>{Sustento_texto || "—"}</Text>
       </Card.Content>
     </Card>
   );

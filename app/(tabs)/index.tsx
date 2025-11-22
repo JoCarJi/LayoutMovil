@@ -14,21 +14,21 @@ import {
   Text,
 } from "react-native-paper";
 
-// import { black } from "react-native-paper/lib/typescript/styles/themes/v2/colors";
+import {
+  analizarSolpedDesdeImagen,
+  pingBackend,
+  ResumenSolped
+} from "../../backend/lib/api";
 import AnalysisResultCard from "../../components/custom/AnalysisResultCard";
-// import { AnalisisRespuesta, analizarImagen } from "../../lib/api";
 
 export default function UploadScreen() {
   const [image, setImage] = useState<ImagePicker.ImagePickerAsset | null>(null);
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<
-    // AnalisisRespuesta 
-  null>(null);
+  const [resumen, setResumen] = useState<ResumenSolped | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const solicitarPermisoGaleria = async () => {
-    const { status } =
-      await ImagePicker.requestMediaLibraryPermissionsAsync();
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== "granted") {
       Alert.alert(
         "Permiso requerido",
@@ -43,16 +43,15 @@ export default function UploadScreen() {
     const ok = await solicitarPermisoGaleria();
     if (!ok) return;
 
-    const pickerResult =
-      await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-        quality: 1,
-      });
+    const pickerResult = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: false,
+      quality: 1,
+    });
 
     if (!pickerResult.canceled) {
       setImage(pickerResult.assets[0]);
-      setResult(null);
+      setResumen(null);
       setErrorMsg(null);
     }
   };
@@ -64,10 +63,11 @@ export default function UploadScreen() {
     }
 
     try {
+      console.log("IMAGE: ", image)
       setLoading(true);
       setErrorMsg(null);
-      // const data = await analizarImagen({ uri: image.uri });
-      // setResult(data);
+      const data = await analizarSolpedDesdeImagen({ uri: image.uri });
+      setResumen(data);
     } catch (err: any) {
       console.error(err);
       setErrorMsg(
@@ -78,37 +78,44 @@ export default function UploadScreen() {
     }
   };
 
+  /* TEST*/
+  const handlePing = async () => {
+    try {
+      await pingBackend();
+    } catch (e) {
+      console.log("PING ERROR", e);
+    }
+  };
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text variant="headlineMedium" style={styles.title}>
-        Analizar imagen
+        Analizar SOLPED
       </Text>
       <Text style={styles.subtitle}>
-        Sube una imagen y la enviaremos a tu servicio de análisis.
+        Sube una imagen de la SOLPED a registrar
       </Text>
 
       <View style={styles.imageContainer}>
         {image ? (
-          <Image
-            source={{ uri: image.uri }}
-            style={styles.image}
-          />
+          <Image source={{ uri: image.uri }} style={styles.image} />
         ) : (
           <View style={styles.placeholder}>
-            <Text style={{ textAlign: "center", opacity: 0.6, color: "#706868ff" }}>
+            <Text style={{ textAlign: "center", opacity: 0.6, color: "#0f0f0fff" }}>
               No has seleccionado ninguna imagen.
             </Text>
           </View>
         )}
       </View>
 
-      <Button
-        mode="contained"
-        style={styles.button}
-        onPress={pickImage}
-      >
+      <Button mode="contained" style={styles.button} onPress={pickImage}>
         Elegir imagen
       </Button>
+      
+      {/* <Button mode="contained" style={styles.button} onPress={handlePing}>
+        PING
+      </Button> */}
+
 
       <Button
         mode="outlined"
@@ -116,13 +123,13 @@ export default function UploadScreen() {
         onPress={handleAnalizar}
         disabled={!image || loading}
       >
-        Analizar imagen
+        <Text style={{color: "#0f0f0fff"}}>Analizar imagen</Text>
       </Button>
 
       {loading && (
         <View style={styles.loading}>
           <ActivityIndicator />
-          <Text style={{ marginTop: 8 }}>Analizando imagen...</Text>
+          <Text style={{ marginTop: 8, color: "#0f0f0fff"}}>Analizando imagen...</Text>
         </View>
       )}
 
@@ -130,7 +137,7 @@ export default function UploadScreen() {
         <Text style={styles.errorText}>{errorMsg}</Text>
       )}
 
-      <AnalysisResultCard result={result} />
+      <AnalysisResultCard resumen={resumen} />
     </ScrollView>
   );
 }
@@ -143,13 +150,13 @@ const styles = StyleSheet.create({
   title: {
     textAlign: "center",
     marginBottom: 4,
-    color: "#000000ff"
+    color: "#0f0f0fff",
   },
   subtitle: {
     textAlign: "center",
     marginBottom: 16,
     opacity: 0.8,
-    color: "#000000ff"
+    color: "#0f0f0fff",
   },
   imageContainer: {
     alignItems: "center",
@@ -166,7 +173,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     borderWidth: 1,
     borderStyle: "dashed",
-    borderColor: "#706868ff",
+    borderColor: "#525252ff",
     justifyContent: "center",
     padding: 16,
   },
