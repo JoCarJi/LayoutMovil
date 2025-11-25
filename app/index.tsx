@@ -14,12 +14,12 @@ import {
   Text,
 } from "react-native-paper";
 
+import AnalysisResultCard from "../src/components/custom/AnalysisResultCard";
 import {
   analizarSolpedDesdeImagen,
   pingBackend,
   ResumenSolped
-} from "../../backend/lib/api";
-import AnalysisResultCard from "../../components/custom/AnalysisResultCard";
+} from "../src/services/api";
 
 export default function UploadScreen() {
   const [image, setImage] = useState<ImagePicker.ImagePickerAsset | null>(null);
