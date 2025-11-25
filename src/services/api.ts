@@ -1,26 +1,5 @@
+import { AnalizarImagenArgs, BackendResponse, ResumenSolped } from "@/types/solped";
 import { Platform } from "react-native";
-
-export interface ResumenSolped {
-  Cantidad: string[];
-  Cantidad_num: number | null;
-  Cantidad_texto: string | null;
-  Caracteristicas: string[];
-  Caracteristicas_texto: string;
-  Descripcion: string[];
-  Descripcion_texto: string;
-  Sustento: string[];
-  Sustento_texto: string;
-  debug?: Record<string, any>;
-}
-
-interface BackendResponse {
-  uploaded_filename: string;
-  resumen: ResumenSolped;
-}
-
-interface AnalizarImagenArgs {
-  uri: string;
-}
 
 // URL de servidor
 const API_BASE_URL = "http://192.168.0.8:5000";
@@ -56,14 +35,14 @@ export async function analizarSolpedDesdeImagen(
   }
 
   const json = (await response.json()) as BackendResponse;
-  console.log("resp:", json);
   return json.resumen;
 }
-export async function pingBackend(): Promise<any> {
-  console.log("PING TO:", `${API_BASE_URL}/health`);
 
-  const res = await fetch(`${API_BASE_URL}/health`);
-  const json = await res.json();
-  console.log("HEALTH:", json);
-  return json;
-}
+// export async function pingBackend(): Promise<any> {
+//   console.log("PING TO:", `${API_BASE_URL}/health`);
+
+//   const res = await fetch(`${API_BASE_URL}/health`);
+//   const json = await res.json();
+//   console.log("HEALTH:", json);
+//   return json;
+// }

@@ -1,29 +1,53 @@
-import { Stack } from 'expo-router';
+// app/_layout.tsx
+import ThemeToggleButton from "@/components/custom/ThemeToggleButton";
+import { AppThemeProvider } from "@/theme/AppThemeProvider";
+import { Stack } from "expo-router";
 import React from "react";
-import { PaperProvider } from "react-native-paper";
-import 'react-native-reanimated';
-
-export const unstable_settings = {
-  anchor: '(tabs)',
-};
 
 export default function RootLayout() {
-  
   return (
-    // <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-    //   <Stack>
-    //     <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-    //     <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
-    //   </Stack>
-    //   <StatusBar style="auto" />
-    // </ThemeProvider>
-    <PaperProvider>
+    <AppThemeProvider>
       <Stack>
-        {/* Tu layout de tabs */}
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        {/* Si tu template trae un modal, lo dejamos */}
-        <Stack.Screen name="modal" options={{ presentation: "modal" }} />
+        <Stack.Screen
+          name="index"
+          options={{
+            title: "Análisis de SOLPED",
+            headerRight: () => <ThemeToggleButton />,
+          }}
+        />
+        <Stack.Screen
+          name="unitario/index"
+          options={{
+            title: "Análisis unitario",
+            headerRight: () => <ThemeToggleButton />,
+          }}
+        />
+        <Stack.Screen
+          name="unitario/resultados"
+          options={{
+            title: "Resultados",
+            headerRight: () => <ThemeToggleButton />,
+          }}
+        />
+        <Stack.Screen
+          name="grupal/index"
+          options={{
+            title: "Análisis grupal",
+            headerRight: () => <ThemeToggleButton />,
+          }}
+        />
+        <Stack.Screen
+          name="grupal/resultados"
+          options={{
+            title: "Resultados grupal",
+            headerRight: () => <ThemeToggleButton />,
+          }}
+        />
+        <Stack.Screen
+          name="modal"
+          options={{ presentation: "modal" }}
+        />
       </Stack>
-    </PaperProvider>
+    </AppThemeProvider>
   );
 }
