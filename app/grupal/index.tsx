@@ -90,7 +90,8 @@ export default function GrupalScreen() {
       pathname: "/unitario/resultados",
       params: {
         resumen: JSON.stringify(item.resumenEditado),
-        batchId: item.id, // para que la pantalla sepa que viene del flujo grupal
+        batchId: item.id, 
+        imageUri: item.uri
       },
     });
   };
@@ -150,7 +151,7 @@ export default function GrupalScreen() {
       ]}
       ListHeaderComponent={
         <>
-          <Text
+          {/* <Text
             variant="titleLarge"
             style={[
               grupalStyles.title,
@@ -158,7 +159,7 @@ export default function GrupalScreen() {
             ]}
           >
             Análisis grupal
-          </Text>
+          </Text> */}
 
           <View style={grupalStyles.actionsRow}>
             <Button

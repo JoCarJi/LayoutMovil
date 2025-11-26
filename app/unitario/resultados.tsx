@@ -1,26 +1,34 @@
-import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useMemo, useState } from "react";
-import { Alert, ScrollView, View } from "react-native";
+import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
+import React, { useEffect, useMemo, useState } from "react";
+import { Alert, Image, ScrollView, View } from "react-native";
 import {
     Button,
+    Dialog,
     Divider,
     IconButton,
+    Portal,
     Text,
     TextInput,
     useTheme
 } from "react-native-paper";
 
+import ThemeToggleButton from "@/components/custom/ThemeToggleButton";
 import { useGrupal } from "@/context/GrupalContext";
 import resultadosUnitarioStyles from "../../src/css/resultadosUnitarioStyles";
 import type { ResumenSolped } from "../../src/types/solped";
 
-
 export default function ResultadosScreen() {
-    const router = useRouter();
-    const params = useLocalSearchParams();
     const theme = useTheme();
+    const router = useRouter();
+    const navigation = useNavigation();
+    const params = useLocalSearchParams();
     const { updateItem } = useGrupal();
+
+    const [showImage, setShowImage] = useState(false);
+    
     const batchId = params.batchId as string | undefined;
+    const imageUri = params.imageUri as string | undefined;
+    
 
     const resumenInicial: ResumenSolped | null = useMemo(() => {
         if (!params.resumen) return null;
@@ -37,6 +45,27 @@ export default function ResultadosScreen() {
             ? resumenInicial.Descripcion
             : [""]
     );
+
+    useEffect(() => {
+        navigation.setOptions({
+        headerRight: () => (
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
+            {imageUri && (
+                <IconButton
+                icon="image-outline"
+                onPress={() =>
+                    router.push({
+                    pathname: "/unitario/preview",
+                    params: { imageUri },
+                    })
+                }
+                />
+            )}
+            <ThemeToggleButton />
+            </View>
+        ),
+        });
+    }, [navigation, imageUri, router]);
 
     const [caracteristicas, setCaracteristicas] = useState<string[]>(
         resumenInicial?.Caracteristicas &&
@@ -88,37 +117,34 @@ export default function ResultadosScreen() {
         if (!resumenInicial) return;
 
         const payload: ResumenSolped = {
-            ...resumenInicial,
-            Descripcion: descripcion,
-            Caracteristicas: caracteristicas,
-            Cantidad: cantidad,
-            Descripcion_texto: descripcion.join(" "),
-            Caracteristicas_texto: caracteristicas.join(" "),
-            Cantidad_texto:
+        ...resumenInicial,
+        Descripcion: descripcion,
+        Caracteristicas: caracteristicas,
+        Cantidad: cantidad,
+        Descripcion_texto: descripcion.join(" "),
+        Caracteristicas_texto: caracteristicas.join(" "),
+        Cantidad_texto:
             cantidad.length > 0 ? cantidad.join(" / ") : null,
-            Sustento_texto: sustento,
+        Sustento_texto: sustento,
         };
 
         if (batchId) {
             // MODO GRUPAL
             updateItem(batchId, {
-            resumenEditado: payload,
-            confirmado: true,
+                resumenEditado: payload,
+                confirmado: true,
             });
-
-            // En web, los onPress del Alert se ignoran, así que navegamos nosotros:
             Alert.alert(
-            "SOLPED actualizada",
-            "Los cambios fueron guardados para esta SOLPED."
+                "SOLPED actualizada",
+                "Los cambios fueron guardados para esta SOLPED."
             );
-            router.back();
+            router.back(); // 👈 volvemos a la lista
         } else {
             // MODO UNITARIO
             console.log("Datos editados:", payload);
             Alert.alert("Guardado local", "Se guardaron los datos editados.");
         }
     };
-
 
     return (
         <ScrollView
@@ -127,6 +153,7 @@ export default function ResultadosScreen() {
                 { backgroundColor: theme.colors.background },
             ]}
         >
+            
             {/* DESCRIPCIÓN */}
             <Text
                 variant="titleMedium"
@@ -278,6 +305,29 @@ export default function ResultadosScreen() {
             >
                 Volver
             </Button>
+            <Portal>
+                <Dialog
+                visible={showImage}
+                onDismiss={() => setShowImage(false)}
+                style={{ maxHeight: "80%" }}
+                >
+                <Dialog.Title>Previsualización</Dialog.Title>
+                <Dialog.Content>
+                    {imageUri ? (
+                    <Image
+                        source={{ uri: imageUri }}
+                        style={{ width: "100%", height: 300 }}
+                        resizeMode="contain"
+                    />
+                    ) : (
+                    <Text>No hay imagen disponible.</Text>
+                    )}
+                </Dialog.Content>
+                <Dialog.Actions>
+                    <Button onPress={() => setShowImage(false)}>Cerrar</Button>
+                </Dialog.Actions>
+                </Dialog>
+            </Portal>
         </ScrollView>
     );
 }

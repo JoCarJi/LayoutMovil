@@ -46,6 +46,13 @@ export default function RootLayout() {
             }}
           />
           <Stack.Screen
+            name="unitario/preview"
+            options={{
+              title: "Imagen",
+              presentation: "modal",
+            }}
+          />
+          <Stack.Screen
             name="modal"
             options={{ presentation: "modal" }}
           />

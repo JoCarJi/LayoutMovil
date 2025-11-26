@@ -2,20 +2,20 @@ import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
-    Alert,
-    Image,
-    ScrollView,
+  Alert,
+  Image,
+  ScrollView,
 } from "react-native";
 import {
-    ActivityIndicator,
-    Button,
-    Text,
-    useTheme
+  ActivityIndicator,
+  Button,
+  Text,
+  useTheme
 } from "react-native-paper";
 
 import unitarioStyles from "../../src/css/unitarioStyles";
 import {
-    analizarSolpedDesdeImagen,
+  analizarSolpedDesdeImagen,
 } from "../../src/services/api";
 import type { ResumenSolped } from "../../src/types/solped";
 
@@ -94,6 +94,7 @@ export default function UnitarioScreen() {
       pathname: "/unitario/resultados",
       params: {
         resumen: JSON.stringify(resumen),
+        imageUri: image.uri
       },
     });
   };
@@ -103,9 +104,9 @@ export default function UnitarioScreen() {
         unitarioStyles.container,
         { backgroundColor: theme.colors.background },
       ]}>
-      <Text variant="titleLarge" style={[unitarioStyles.title, { color: theme.colors.onBackground }]}>
+      {/* <Text variant="titleLarge" style={[unitarioStyles.title, { color: theme.colors.onBackground }]}>
         Análisis unitario
-      </Text>
+      </Text> */}
 
       <ScrollView
         contentContainerStyle={unitarioStyles.previewBox}
