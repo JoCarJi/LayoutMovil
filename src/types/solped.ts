@@ -1,3 +1,5 @@
+export type LoteStatus = "pending" | "processing" | "done" | "error";
+
 export interface ResumenSolped {
   Cantidad: string[];
   Cantidad_num: number | null;
@@ -9,6 +11,17 @@ export interface ResumenSolped {
   Sustento: string[];
   Sustento_texto: string;
   debug?: Record<string, any>;
+}
+
+export interface SolpedBatchItem {
+  id: string;
+  uri: string;
+  nombre: string;
+  status: LoteStatus;
+  resumenOriginal?: ResumenSolped;
+  resumenEditado?: ResumenSolped;
+  errorMsg?: string;
+  confirmado?: boolean;
 }
 
 export interface BackendResponse {

@@ -1,7 +1,6 @@
-// app/unitario/resultados.tsx
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useMemo, useState } from "react";
-import { ScrollView, View } from "react-native";
+import { Alert, ScrollView, View } from "react-native";
 import {
     Button,
     Divider,
@@ -11,13 +10,17 @@ import {
     useTheme
 } from "react-native-paper";
 
+import { useGrupal } from "@/context/GrupalContext";
 import resultadosUnitarioStyles from "../../src/css/resultadosUnitarioStyles";
 import type { ResumenSolped } from "../../src/types/solped";
+
 
 export default function ResultadosScreen() {
     const router = useRouter();
     const params = useLocalSearchParams();
     const theme = useTheme();
+    const { updateItem } = useGrupal();
+    const batchId = params.batchId as string | undefined;
 
     const resumenInicial: ResumenSolped | null = useMemo(() => {
         if (!params.resumen) return null;
@@ -82,6 +85,8 @@ export default function ResultadosScreen() {
     };
 
     const handleGuardar = () => {
+        if (!resumenInicial) return;
+
         const payload: ResumenSolped = {
             ...resumenInicial,
             Descripcion: descripcion,
@@ -90,13 +95,30 @@ export default function ResultadosScreen() {
             Descripcion_texto: descripcion.join(" "),
             Caracteristicas_texto: caracteristicas.join(" "),
             Cantidad_texto:
-                cantidad.length > 0 ? cantidad.join(" / ") : null,
+            cantidad.length > 0 ? cantidad.join(" / ") : null,
             Sustento_texto: sustento,
         };
 
-        console.log("Datos editados para guardar:", payload);
-        // Aquí luego llamas a tu endpoint para guardar en BD
+        if (batchId) {
+            // MODO GRUPAL
+            updateItem(batchId, {
+            resumenEditado: payload,
+            confirmado: true,
+            });
+
+            // En web, los onPress del Alert se ignoran, así que navegamos nosotros:
+            Alert.alert(
+            "SOLPED actualizada",
+            "Los cambios fueron guardados para esta SOLPED."
+            );
+            router.back();
+        } else {
+            // MODO UNITARIO
+            console.log("Datos editados:", payload);
+            Alert.alert("Guardado local", "Se guardaron los datos editados.");
+        }
     };
+
 
     return (
         <ScrollView
@@ -246,7 +268,7 @@ export default function ResultadosScreen() {
                 style={{ marginTop: 24 }}
                 onPress={handleGuardar}
             >
-                Guardar
+                {batchId ? "Guardar y volver" : "Guardar"}
             </Button>
 
             <Button
