@@ -14,8 +14,10 @@ import {
 
 import ThemeToggleButton from "@/components/custom/ThemeToggleButton";
 import { useGrupal } from "@/context/GrupalContext";
+import { guardarSolped } from "@/services/api";
 import resultadosUnitarioStyles from "../../src/css/resultadosUnitarioStyles";
 import type { ResumenSolped } from "../../src/types/solped";
+
 
 export default function ResultadosScreen() {
     const theme = useTheme();
@@ -26,6 +28,7 @@ export default function ResultadosScreen() {
 
     const [showImage, setShowImage] = useState(false);
     
+    const nombreArchivo = params.nombreArchivo as string | undefined;
     const batchId = params.batchId as string | undefined;
     const imageUri = params.imageUri as string | undefined;
     
@@ -113,8 +116,12 @@ export default function ResultadosScreen() {
         setter(next);
     };
 
-    const handleGuardar = () => {
-        if (!resumenInicial) return;
+    const handleGuardar = async () => {
+        console.log("shot");
+        if (!resumenInicial || !imageUri || !nombreArchivo) {
+            Alert.alert("Falta información", "No se puede guardar esta SOLPED.");
+            return;
+        }
 
         const payload: ResumenSolped = {
         ...resumenInicial,
@@ -138,11 +145,23 @@ export default function ResultadosScreen() {
                 "SOLPED actualizada",
                 "Los cambios fueron guardados para esta SOLPED."
             );
-            router.back(); // 👈 volvemos a la lista
+            router.back();
         } else {
-            // MODO UNITARIO
-            console.log("Datos editados:", payload);
-            Alert.alert("Guardado local", "Se guardaron los datos editados.");
+            try {
+                const resp = await guardarSolped({
+                    origen: "unitario",
+                    idLote: null,
+                    nombreArchivo,
+                    rutaImagen: imageUri,
+                    resumen: payload,
+                });
+
+                console.log("Guardado en BD, id_solped:", resp.id_solped);
+                Alert.alert("Guardado", "SOLPED guardada correctamente.");
+            } catch (err: any) {
+                console.error(err);
+                Alert.alert("Error", "No se pudo guardar en la base de datos.");
+            }
         }
     };
 

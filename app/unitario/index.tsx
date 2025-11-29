@@ -30,6 +30,8 @@ export default function UnitarioScreen() {
 
   const [resumen, setResumen] =
     useState<ResumenSolped | null>(null);
+  const [nombreArchivo, setNombreArchivo] = useState<string | null>(null);
+
 
   const [errorMsg, setErrorMsg] =
     useState<string | null>(null);
@@ -77,7 +79,8 @@ export default function UnitarioScreen() {
       const data = await analizarSolpedDesdeImagen({
         uri: image.uri,
       });
-      setResumen(data);
+      setResumen(data.resumen);
+      setNombreArchivo(data.uploaded_filename);
     } catch (err: any) {
       console.error(err);
       setErrorMsg(
@@ -89,14 +92,15 @@ export default function UnitarioScreen() {
   };
 
   const irAResultados = () => {
-    if (!resumen) return;
-    router.push({
-      pathname: "/unitario/resultados",
-      params: {
-        resumen: JSON.stringify(resumen),
-        imageUri: image.uri
-      },
-    });
+    if (!resumen || !image || !nombreArchivo) return;
+      router.push({
+        pathname: "/unitario/resultados",
+        params: {
+          resumen: JSON.stringify(resumen),
+          imageUri: image.uri,
+          nombreArchivo,
+        },
+      });
   };
 
   return (

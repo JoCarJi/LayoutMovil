@@ -4,17 +4,17 @@ import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import { Alert, FlatList, TouchableOpacity, View } from "react-native";
 import {
-    Button,
-    Icon,
-    IconButton,
-    List,
-    Text,
-    useTheme,
+  Button,
+  Icon,
+  IconButton,
+  List,
+  Text,
+  useTheme,
 } from "react-native-paper";
 
 import { useGrupal } from "@/context/GrupalContext";
 import grupalStyles from "@/css/grupalStyles";
-import { analizarSolpedDesdeImagen } from "@/services/api";
+import { analizarSolpedDesdeImagen, guardarSolped } from "@/services/api";
 import type { SolpedBatchItem } from "@/types/solped";
 
 function crearId() {
@@ -64,7 +64,7 @@ export default function GrupalScreen() {
         updateItem(item.id, { status: "processing", errorMsg: undefined });
 
         try {
-          const resumen = await analizarSolpedDesdeImagen({ uri: item.uri });
+          const {resumen} = await analizarSolpedDesdeImagen({ uri: item.uri });
           updateItem(item.id, {
             status: "done",
             resumenOriginal: resumen,
@@ -91,7 +91,8 @@ export default function GrupalScreen() {
       params: {
         resumen: JSON.stringify(item.resumenEditado),
         batchId: item.id, 
-        imageUri: item.uri
+        imageUri: item.uri,
+        nombreArchivo: item.nombre,
       },
     });
   };
@@ -105,9 +106,7 @@ export default function GrupalScreen() {
     return "";
   };
 
-  const handleGuardarLista = () => {
-    console.log("CLICK GUARDAR LISTA"); // tu log
-
+  const handleGuardarLista = async () => {
     if (items.length === 0) {
         Alert.alert("Sin registros", "No hay SOLPED en la lista.");
         return;
@@ -136,10 +135,28 @@ export default function GrupalScreen() {
         return;
     }
 
-    // Si llegó aquí, todo está analizado y confirmado
-    Alert.alert("Guardado exitoso", "Se simuló el guardado en la base.");
-    // Si quieres limpiar la lista:
-    // reset();
+        try {
+        for (const item of items) {
+          if (!item.resumenEditado) continue;
+
+          await guardarSolped({
+            origen: "grupal",
+            idLote: null,                 // luego si quieres manejas id_lote real
+            nombreArchivo: item.nombre,
+            rutaImagen: item.uri,
+            resumen: item.resumenEditado,
+          });
+        }
+
+        Alert.alert("Guardado exitoso", "Se guardaron todas las SOLPED.");
+        // reset(); // si quieres limpiar la lista
+      } catch (err: any) {
+        console.error(err);
+        Alert.alert(
+          "Error",
+          "Ocurrió un error al guardar la lista de SOLPED."
+        );
+      }
     };
 
 
