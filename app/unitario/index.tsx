@@ -15,7 +15,7 @@ import {
 
 import unitarioStyles from "../../src/css/unitarioStyles";
 import {
-  analizarSolpedDesdeImagen,
+  analizarGuardarIA
 } from "../../src/services/api";
 import type { ResumenSolped } from "../../src/types/solped";
 
@@ -68,24 +68,28 @@ export default function UnitarioScreen() {
   };
 
   const handleAnalizar = async () => {
-    if (!image) {
-      Alert.alert("Sin imagen", "Primero selecciona una imagen.");
-      return;
-    }
+    if (!image) return;
 
     try {
       setLoading(true);
-      setErrorMsg(null);
-      const data = await analizarSolpedDesdeImagen({
+
+      const r = await analizarGuardarIA({
         uri: image.uri,
+        origen: "unitario",
       });
-      setResumen(data.resumen);
-      setNombreArchivo(data.uploaded_filename);
-    } catch (err: any) {
-      console.error(err);
-      setErrorMsg(
-        err?.message ?? "Ocurrió un error al analizar la imagen."
-      );
+
+      router.push({
+        pathname: "/unitario/resultados",
+        params: {
+          resumen: JSON.stringify(r.resumen),
+          idSolped: String(r.id_solped),      // ✅ IMPORTANTISIMO
+          nombreArchivo: r.nombre_archivo,
+          imageUri: image.uri,
+          rutaImagenServer: r.ruta_imagen,
+        },
+      });
+    } catch (e: any) {
+      Alert.alert("Error", e.message ?? "No se pudo analizar");
     } finally {
       setLoading(false);
     }

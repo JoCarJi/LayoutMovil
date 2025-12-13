@@ -14,7 +14,7 @@ import {
 
 import ThemeToggleButton from "@/components/custom/ThemeToggleButton";
 import { useGrupal } from "@/context/GrupalContext";
-import { analizarGuardarIA } from "@/services/api";
+import { guardarFinal } from "@/services/api";
 import resultadosUnitarioStyles from "../../src/css/resultadosUnitarioStyles";
 import type { ResumenSolped } from "../../src/types/solped";
 
@@ -134,6 +134,8 @@ export default function ResultadosScreen() {
             cantidad.length > 0 ? cantidad.join(" / ") : null,
         Sustento_texto: sustento,
         };
+console.log("idSolped param:", params.idSolped);
+console.log("idSolped parsed:", idSolped);
 
         if (batchId) {
             // MODO GRUPAL
@@ -141,28 +143,29 @@ export default function ResultadosScreen() {
             Alert.alert("SOLPED actualizada", "Los cambios fueron guardados para esta SOLPED.");
             router.back();
             return;
-        } else {
-            try {
-                const r = await analizarGuardarIA({ uri: imageUri, origen: "unitario" });
+        } 
+        if (!idSolped) {
+            Alert.alert("Error", "No se encontró el id de la SOLPED.");
+            return;
+        }
 
-                router.push({
-                    pathname: "/unitario/resultados",
-                    params: {
-                        resumen: JSON.stringify(r.resumen),
-                        idSolped: String(r.id_solped),
-                        nombreArchivo: r.nombre_archivo,
-                        // para preview puedes seguir usando el uri local:
-                        imageUri,
-                        // y si quieres, también guarda ruta del server:
-                        rutaImagenServer: r.ruta_imagen,
+        try {
+            await guardarFinal({
+            idSolped,
+            resumenFinal: payload,
+            });
+
+            Alert.alert("Guardado", "SOLPED guardada correctamente.", [
+            {
+                text: "OK",
+                onPress: () => {
+                    router.back();
                 },
-                });
-                console.log("Guardado en BD, id_solped:", r.id_solped);
-                Alert.alert("Guardado", "SOLPED guardada correctamente.");
-            } catch (err: any) {
-                console.error(err);
-                Alert.alert("Error", "No se pudo guardar en la base de datos.");
-            }
+            },
+            ]);
+        } catch (err: any) {
+            console.error(err);
+            Alert.alert("Error", "No se pudo guardar en la base de datos.");
         }
     };
 
