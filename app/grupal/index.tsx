@@ -13,7 +13,7 @@ import {
 
 import { useGrupal } from "@/context/GrupalContext";
 import grupalStyles from "@/css/grupalStyles";
-import { analizarSolpedDesdeImagen, guardarSolped } from "@/services/api";
+import { analizarGuardarIA, crearLote, guardarFinal } from "@/services/api";
 import type { SolpedBatchItem } from "@/types/solped";
 
 function crearId() {
@@ -23,8 +23,11 @@ function crearId() {
 export default function GrupalScreen() {
   const theme = useTheme();
   const router = useRouter();
+
   const { items, setItems, updateItem, removeItem, reset } = useGrupal();
   const [analizando, setAnalizando] = useState(false);
+  const [idLote, setIdLote] = useState<number | null>(null);
+
 
   const handleSeleccionar = async () => {
     try {
@@ -55,6 +58,8 @@ export default function GrupalScreen() {
       return;
     }
 
+    const lote = await prepararLoteSiNoExiste();
+
     setAnalizando(true);
     try {
       for (const item of items) {
@@ -63,11 +68,18 @@ export default function GrupalScreen() {
         updateItem(item.id, { status: "processing", errorMsg: undefined });
 
         try {
-          const {resumen} = await analizarSolpedDesdeImagen({ uri: item.uri });
+          const r = await analizarGuardarIA({
+            uri: item.uri,
+            origen: "grupal",
+            idLote: lote,
+          });
+
           updateItem(item.id, {
             status: "done",
-            resumenOriginal: resumen,
-            resumenEditado: resumen,
+            resumenOriginal: r.resumen,
+            resumenEditado: r.resumen,
+            idSolped: r.id_solped,
+            rutaImagenServer: r.ruta_imagen
           });
         } catch (err: any) {
           console.error(err);
@@ -89,20 +101,12 @@ export default function GrupalScreen() {
       pathname: "/unitario/resultados",
       params: {
         resumen: JSON.stringify(item.resumenEditado),
-        batchId: item.id, 
+        batchId: item.id,
+        idSolped: String(item.idSolped),
         imageUri: item.uri,
         nombreArchivo: item.nombre,
       },
     });
-  };
-
-  const textoEstado = (item: SolpedBatchItem): string => {
-    if (item.status === "pending") return "Pendiente";
-    if (item.status === "processing") return "Analizando...";
-    if (item.status === "error") return "Error";
-    if (item.status === "done" && item.confirmado) return "Guardado";
-    if (item.status === "done") return "Analizado";
-    return "";
   };
 
   const handleGuardarLista = async () => {
@@ -135,14 +139,11 @@ export default function GrupalScreen() {
 
         try {
         for (const item of items) {
-          if (!item.resumenEditado) continue;
+          if (!item.idSolped) continue;
 
-          await guardarSolped({
-            origen: "grupal",
-            idLote: null,
-            nombreArchivo: item.nombre,
-            rutaImagen: item.uri,
-            resumen: item.resumenEditado,
+          await guardarFinal({
+            idSolped: item.idSolped,
+            resumenFinal: item.resumenEditado
           });
         }
 
@@ -155,7 +156,23 @@ export default function GrupalScreen() {
           "Ocurrió un error al guardar la lista de SOLPED."
         );
       }
-    };
+  };
+
+  const textoEstado = (item: SolpedBatchItem): string => {
+    if (item.status === "pending") return "Pendiente";
+    if (item.status === "processing") return "Analizando...";
+    if (item.status === "error") return "Error";
+    if (item.status === "done" && item.confirmado) return "Guardado";
+    if (item.status === "done") return "Analizado";
+    return "";
+  };
+
+  const prepararLoteSiNoExiste = async () => {
+    if (idLote) return idLote;
+    const r = await crearLote(`Lote ${new Date().toISOString()}`);
+    setIdLote(r.id_lote);
+    return r.id_lote;
+  };
 
 
   return (

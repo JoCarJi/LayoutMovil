@@ -14,7 +14,7 @@ import {
 
 import ThemeToggleButton from "@/components/custom/ThemeToggleButton";
 import { useGrupal } from "@/context/GrupalContext";
-import { guardarSolped } from "@/services/api";
+import { analizarGuardarIA } from "@/services/api";
 import resultadosUnitarioStyles from "../../src/css/resultadosUnitarioStyles";
 import type { ResumenSolped } from "../../src/types/solped";
 
@@ -31,7 +31,7 @@ export default function ResultadosScreen() {
     const nombreArchivo = params.nombreArchivo as string | undefined;
     const batchId = params.batchId as string | undefined;
     const imageUri = params.imageUri as string | undefined;
-    
+    const idSolped = params.idSolped ? Number(params.idSolped) : null;    
 
     const resumenInicial: ResumenSolped | null = useMemo(() => {
         if (!params.resumen) return null;
@@ -137,26 +137,27 @@ export default function ResultadosScreen() {
 
         if (batchId) {
             // MODO GRUPAL
-            updateItem(batchId, {
-                resumenEditado: payload,
-                confirmado: true,
-            });
-            Alert.alert(
-                "SOLPED actualizada",
-                "Los cambios fueron guardados para esta SOLPED."
-            );
+            updateItem(batchId, { resumenEditado: payload, confirmado: true});
+            Alert.alert("SOLPED actualizada", "Los cambios fueron guardados para esta SOLPED.");
             router.back();
+            return;
         } else {
             try {
-                const resp = await guardarSolped({
-                    origen: "unitario",
-                    idLote: null,
-                    nombreArchivo,
-                    rutaImagen: imageUri,
-                    resumen: payload,
-                });
+                const r = await analizarGuardarIA({ uri: imageUri, origen: "unitario" });
 
-                console.log("Guardado en BD, id_solped:", resp.id_solped);
+                router.push({
+                    pathname: "/unitario/resultados",
+                    params: {
+                        resumen: JSON.stringify(r.resumen),
+                        idSolped: String(r.id_solped),
+                        nombreArchivo: r.nombre_archivo,
+                        // para preview puedes seguir usando el uri local:
+                        imageUri,
+                        // y si quieres, también guarda ruta del server:
+                        rutaImagenServer: r.ruta_imagen,
+                },
+                });
+                console.log("Guardado en BD, id_solped:", r.id_solped);
                 Alert.alert("Guardado", "SOLPED guardada correctamente.");
             } catch (err: any) {
                 console.error(err);

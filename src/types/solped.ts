@@ -18,6 +18,9 @@ export interface SolpedBatchItem {
   uri: string;
   nombre: string;
   status: LoteStatus;
+  idSolped?: number;
+  rutaImagenServer?: string;
+  idLote?: number | null;
   resumenOriginal?: ResumenSolped;
   resumenEditado?: ResumenSolped;
   errorMsg?: string;

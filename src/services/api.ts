@@ -51,27 +51,74 @@ export async function analizarSolpedDesdeImagen(
   return (await response.json()) as BackendResponse;
 }
 
-export async function guardarSolped(
-  args: GuardarSolpedArgs
-): Promise<GuardarSolpedResponse> {
-  const response = await fetch(`${API_BASE_URL}/solped/save`, {
+export async function analizarGuardarIA({
+  uri,
+  origen,
+  idLote,
+}: {
+  uri: string;
+  origen: "unitario" | "grupal";
+  idLote?: number | null;
+}) {
+  const formData = new FormData();
+
+  formData.append("origen", origen);
+  if (idLote) formData.append("id_lote", String(idLote));
+
+  if (Platform.OS === "web") {
+    const resp = await fetch(uri);
+    const blob = await resp.blob();
+    formData.append("file", blob, "solped.png");
+  } else {
+    formData.append("file", {
+      uri,
+      name: "solped.png",
+      type: "image/png",
+    } as any);
+  }
+
+  const res = await fetch(`${API_BASE_URL}/solped/analyze_and_save_ia`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    body: formData,
+  });
+
+  if (!res.ok) throw new Error(await res.text());
+  return res.json() as Promise<{
+    ok: boolean;
+    id_solped: number;
+    nombre_archivo: string;
+    ruta_imagen: string; // <- la ruta persistente del server
+    resumen: ResumenSolped;
+  }>;
+}
+
+export async function guardarFinal({
+  idSolped,
+  resumenFinal,
+}: {
+  idSolped: number;
+  resumenFinal: ResumenSolped;
+}) {
+  const res = await fetch(`${API_BASE_URL}/solped/save_final`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      origen: args.origen,
-      id_lote: args.idLote ?? null,
-      nombre_archivo: args.nombreArchivo,
-      ruta_imagen: args.rutaImagen,
-      resumen: args.resumen,
+      id_solped: idSolped,
+      resumen_final: resumenFinal,
     }),
   });
 
-  if (!response.ok) {
-    const text = await response.text();
-    throw new Error(`Error ${response.status}: ${text}`);
-  }
-
-  return (await response.json()) as GuardarSolpedResponse;
+  if (!res.ok) throw new Error(await res.text());
+  return res.json() as Promise<{ ok: boolean; id_solped: number }>;
 }
+
+export async function crearLote(nombre?: string) {
+  const res = await fetch(`${API_BASE_URL}/lote/create`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ nombre_lote: nombre ?? null }),
+  });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json() as Promise<{ ok: boolean; id_lote: number }>;
+}
+
