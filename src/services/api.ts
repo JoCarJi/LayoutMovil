@@ -75,13 +75,3 @@ export async function guardarSolped(
 
   return (await response.json()) as GuardarSolpedResponse;
 }
-
-
-// export async function pingBackend(): Promise<any> {
-//   console.log("PING TO:", `${API_BASE_URL}/health`);
-
-//   const res = await fetch(`${API_BASE_URL}/health`);
-//   const json = await res.json();
-//   console.log("HEALTH:", json);
-//   return json;
-// }

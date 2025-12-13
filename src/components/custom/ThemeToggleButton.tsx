@@ -1,4 +1,3 @@
-// src/components/custom/ThemeToggleButton.tsx
 import { useColorMode } from "@/theme/AppThemeProvider";
 import React from "react";
 import { IconButton } from "react-native-paper";

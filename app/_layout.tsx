@@ -1,4 +1,3 @@
-// app/_layout.tsx
 import ThemeToggleButton from "@/components/custom/ThemeToggleButton";
 import { GrupalProvider } from "@/context/GrupalContext";
 import { AppThemeProvider } from "@/theme/AppThemeProvider";

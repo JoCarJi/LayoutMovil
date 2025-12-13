@@ -1,4 +1,3 @@
-// app/grupal/index.tsx
 import * as DocumentPicker from "expo-document-picker";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
@@ -31,7 +30,7 @@ export default function GrupalScreen() {
     try {
       const res = await DocumentPicker.getDocumentAsync({
         multiple: true,
-        type: ["image/*"], // ajusta si luego quieres PDFs
+        type: ["image/*"],
       });
 
       if (res.canceled) return;
@@ -126,7 +125,6 @@ export default function GrupalScreen() {
     }
 
     if (noConfirmadas.length > 0) {
-        // Nada de botones con callbacks (en web no funcionan)
         Alert.alert(
         "Falta confirmar",
         "Hay SOLPED analizadas que no han sido guardadas individualmente. " +
@@ -141,7 +139,7 @@ export default function GrupalScreen() {
 
           await guardarSolped({
             origen: "grupal",
-            idLote: null,                 // luego si quieres manejas id_lote real
+            idLote: null,
             nombreArchivo: item.nombre,
             rutaImagen: item.uri,
             resumen: item.resumenEditado,
@@ -149,7 +147,7 @@ export default function GrupalScreen() {
         }
 
         Alert.alert("Guardado exitoso", "Se guardaron todas las SOLPED.");
-        // reset(); // si quieres limpiar la lista
+        // reset(); 
       } catch (err: any) {
         console.error(err);
         Alert.alert(
@@ -168,16 +166,6 @@ export default function GrupalScreen() {
       ]}
       ListHeaderComponent={
         <>
-          {/* <Text
-            variant="titleLarge"
-            style={[
-              grupalStyles.title,
-              { color: theme.colors.onBackground },
-            ]}
-          >
-            Análisis grupal
-          </Text> */}
-
           <View style={grupalStyles.actionsRow}>
             <Button
               mode="outlined"

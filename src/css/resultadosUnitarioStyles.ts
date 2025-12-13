@@ -1,4 +1,3 @@
-// src/css/resultadosUnitarioStyles.ts
 import { StyleSheet } from "react-native";
 
 const resultadosUnitarioStyles = StyleSheet.create({

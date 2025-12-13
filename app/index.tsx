@@ -1,4 +1,3 @@
-// app/index.tsx
 import homeStyles from "@/css/homeStyles";
 import { useRouter } from "expo-router";
 import React from "react";

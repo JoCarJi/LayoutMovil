@@ -1,4 +1,3 @@
-// src/css/unitarioStyles.ts
 import { StyleSheet } from "react-native";
 
 const unitarioStyles = StyleSheet.create({

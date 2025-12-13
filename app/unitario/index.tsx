@@ -108,9 +108,6 @@ export default function UnitarioScreen() {
         unitarioStyles.container,
         { backgroundColor: theme.colors.background },
       ]}>
-      {/* <Text variant="titleLarge" style={[unitarioStyles.title, { color: theme.colors.onBackground }]}>
-        Análisis unitario
-      </Text> */}
 
       <ScrollView
         contentContainerStyle={unitarioStyles.previewBox}

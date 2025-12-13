@@ -1,4 +1,3 @@
-// components/AnalysisResultCard.tsx
 import { ResumenSolped } from "@/types/solped";
 import React from "react";
 import { StyleSheet } from "react-native";
@@ -12,10 +11,8 @@ const AnalysisResultCard: React.FC<Props> = ({ resumen }) => {
   if (!resumen) return null;
 
   const {
-    Descripcion_texto,
     Caracteristicas_texto,
     Sustento_texto,
-    Cantidad_texto,
   } = resumen;
 
   const desc =

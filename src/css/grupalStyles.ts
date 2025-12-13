@@ -1,4 +1,3 @@
-// src/css/grupalStyles.ts
 import { StyleSheet } from "react-native";
 
 const grupalStyles = StyleSheet.create({
