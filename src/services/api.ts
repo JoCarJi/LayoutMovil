@@ -38,7 +38,7 @@ export async function analizarSolpedDesdeImagen(
     formData.append("file", fileToUpload);
   }
 
-  const response = await fetch(`${API_BASE_URL}/predict_coords`, {
+  const response = await fetch(`${API_BASE_URL}/predict`, {
     method: "POST",
     body: formData,
   });
